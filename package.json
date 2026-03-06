@@ -64,7 +64,15 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/clawkit/clawkit"
+    "url": "https://github.com/ZohaibAhmed/clawkit"
   },
-  "license": "MIT"
+  "homepage": "https://github.com/ZohaibAhmed/clawkit#readme",
+  "bugs": {
+    "url": "https://github.com/ZohaibAhmed/clawkit/issues"
+  },
+  "author": "Zohaib Ahmed <zohaib@resemble.ai>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
 }
