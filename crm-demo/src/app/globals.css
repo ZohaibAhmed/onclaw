@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+:root {
+  --ck-bg: #0f172a;
+  --ck-bg-secondary: #1e293b;
+  --ck-bg-hover: #334155;
+  --ck-text: #f1f5f9;
+  --ck-text-muted: #94a3b8;
+  --ck-accent: #6366f1;
+  --ck-accent-text: #ffffff;
+  --ck-border: #334155;
+  --ck-radius: 8px;
+  --ck-font: "Inter", -apple-system, sans-serif;
+}

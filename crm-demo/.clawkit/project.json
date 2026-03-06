@@ -1,0 +1,177 @@
+{
+  "name": "SalesForge CRM",
+  "description": "AI-powered sales CRM with complete pipeline management, contact tracking, and analytics",
+  "framework": "nextjs",
+  "version": "16.1.6",
+  "database": {
+    "type": "postgresql",
+    "orm": "drizzle"
+  },
+  "auth": {
+    "type": "none",
+    "demoUser": {
+      "id": "1",
+      "name": "Zohaib Ahmed",
+      "email": "zohaib@salesforge.ai",
+      "role": "admin"
+    }
+  },
+  "styling": {
+    "approach": "tailwindcss",
+    "theme": "dark",
+    "colorPalette": "slate-indigo"
+  },
+  "schema": {
+    "users": {
+      "description": "Sales representatives and team members",
+      "columns": {
+        "id": { "type": "serial", "primaryKey": true },
+        "name": { "type": "text", "required": true, "description": "Full name of the user" },
+        "email": { "type": "text", "required": true, "unique": true },
+        "role": { "type": "enum", "values": ["rep", "manager", "admin"], "default": "rep" },
+        "team": { "type": "text", "required": true, "description": "Team or department" },
+        "avatar": { "type": "text", "description": "Avatar initials or emoji" },
+        "createdAt": { "type": "timestamp", "default": "now" }
+      }
+    },
+    "companies": {
+      "description": "Customer and prospect companies",
+      "columns": {
+        "id": { "type": "serial", "primaryKey": true },
+        "name": { "type": "text", "required": true },
+        "domain": { "type": "text", "description": "Company website domain" },
+        "industry": { "type": "text", "required": true },
+        "size": { "type": "enum", "values": ["startup", "smb", "mid-market", "enterprise"] },
+        "revenue": { "type": "numeric", "description": "Annual revenue" },
+        "city": { "type": "text" },
+        "state": { "type": "text" },
+        "country": { "type": "text", "default": "US" },
+        "createdAt": { "type": "timestamp", "default": "now" }
+      }
+    },
+    "contacts": {
+      "description": "Individual contacts and leads",
+      "columns": {
+        "id": { "type": "serial", "primaryKey": true },
+        "firstName": { "type": "text", "required": true },
+        "lastName": { "type": "text", "required": true },
+        "email": { "type": "text", "required": true },
+        "phone": { "type": "text" },
+        "company": { "type": "text", "description": "Company name (denormalized)" },
+        "companyId": { "type": "integer", "foreignKey": "companies.id" },
+        "title": { "type": "text", "description": "Job title" },
+        "status": { "type": "enum", "values": ["lead", "customer", "churned"], "default": "lead" },
+        "source": { "type": "enum", "values": ["website", "referral", "linkedin", "cold-outreach", "event", "partner"], "default": "website" },
+        "ownerId": { "type": "integer", "foreignKey": "users.id", "description": "Assigned sales rep" },
+        "createdAt": { "type": "timestamp", "default": "now" },
+        "updatedAt": { "type": "timestamp", "default": "now" }
+      },
+      "relations": {
+        "owner": "users",
+        "company": "companies"
+      }
+    },
+    "deals": {
+      "description": "Sales opportunities and pipeline deals",
+      "columns": {
+        "id": { "type": "serial", "primaryKey": true },
+        "name": { "type": "text", "required": true, "description": "Deal or opportunity name" },
+        "value": { "type": "numeric", "required": true, "description": "Deal value in USD" },
+        "stage": { "type": "enum", "values": ["prospecting", "qualification", "proposal", "negotiation", "closed-won", "closed-lost"], "default": "prospecting" },
+        "probability": { "type": "integer", "default": 10, "description": "Win probability percentage" },
+        "contactId": { "type": "integer", "foreignKey": "contacts.id" },
+        "companyId": { "type": "integer", "foreignKey": "companies.id" },
+        "ownerId": { "type": "integer", "foreignKey": "users.id", "description": "Assigned sales rep" },
+        "expectedCloseDate": { "type": "date", "description": "Projected close date" },
+        "createdAt": { "type": "timestamp", "default": "now" },
+        "updatedAt": { "type": "timestamp", "default": "now" }
+      },
+      "relations": {
+        "contact": "contacts",
+        "company": "companies",
+        "owner": "users"
+      }
+    },
+    "activities": {
+      "description": "Sales activities and interactions",
+      "columns": {
+        "id": { "type": "serial", "primaryKey": true },
+        "type": { "type": "enum", "values": ["call", "email", "meeting", "note", "task"] },
+        "subject": { "type": "text", "required": true, "description": "Activity title or subject" },
+        "body": { "type": "text", "description": "Activity details or notes" },
+        "contactId": { "type": "integer", "foreignKey": "contacts.id" },
+        "dealId": { "type": "integer", "foreignKey": "deals.id" },
+        "ownerId": { "type": "integer", "foreignKey": "users.id", "description": "User who performed the activity" },
+        "completedAt": { "type": "timestamp", "description": "When the activity was completed" },
+        "createdAt": { "type": "timestamp", "default": "now" }
+      },
+      "relations": {
+        "contact": "contacts",
+        "deal": "deals",
+        "owner": "users"
+      }
+    }
+  },
+  "queries": {
+    "getUsers": "Get all sales reps and team members",
+    "getContacts": "Get contacts with filtering by status, source, owner, and search",
+    "getCompanies": "Get companies with industry and size filtering",
+    "getDeals": "Get deals with stage, owner, and value filtering",
+    "getActivities": "Get recent activities with type and owner filtering",
+    "getDashboardMetrics": "Get key metrics: pipeline value, win rate, avg deal size",
+    "getPipelineByStage": "Get deal counts and values grouped by stage",
+    "getLeaderboard": "Get top performing reps by revenue",
+    "getMonthlyTrends": "Get won/lost deals by month for trending",
+    "getAnalyticsBySource": "Get deal attribution by lead source",
+    "getAnalyticsByRep": "Get win rates and performance by sales rep"
+  },
+  "actions": {
+    "updateDealStage": "Move a deal to a different pipeline stage",
+    "updateContactStatus": "Change contact status (lead, customer, churned)",
+    "updateDealProbability": "Adjust the win probability of a deal"
+  },
+  "pages": {
+    "dashboard": {
+      "path": "/",
+      "description": "Overview with metrics, pipeline, leaderboard, and activity feed",
+      "dataQueries": ["getDashboardMetrics", "getPipelineByStage", "getLeaderboard", "getMonthlyTrends", "getActivities"]
+    },
+    "contacts": {
+      "path": "/contacts",
+      "description": "Contact management with search, filtering, and pagination",
+      "dataQueries": ["getContacts"]
+    },
+    "deals": {
+      "path": "/deals",
+      "description": "Deal pipeline kanban board with drag-and-drop",
+      "dataQueries": ["getDeals"]
+    },
+    "analytics": {
+      "path": "/analytics",
+      "description": "Revenue analytics, funnel analysis, and performance metrics",
+      "dataQueries": ["getAnalyticsBySource", "getAnalyticsByRep", "getMonthlyTrends"]
+    },
+    "settings": {
+      "path": "/settings",
+      "description": "Application settings and configuration"
+    }
+  },
+  "uiPatterns": {
+    "cardStyle": "bg-slate-900 rounded-xl border border-slate-800",
+    "buttonPrimary": "bg-indigo-600 hover:bg-indigo-500 text-white",
+    "textPrimary": "text-slate-100",
+    "textSecondary": "text-slate-400",
+    "textMuted": "text-slate-500",
+    "statusColors": {
+      "lead": "#6366f1",
+      "customer": "#22c55e",
+      "churned": "#ef4444",
+      "prospecting": "#6366f1",
+      "qualification": "#8b5cf6",
+      "proposal": "#f59e0b",
+      "negotiation": "#f97316",
+      "closed-won": "#22c55e",
+      "closed-lost": "#ef4444"
+    }
+  }
+}
