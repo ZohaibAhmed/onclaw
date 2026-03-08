@@ -4,18 +4,23 @@
  */
 
 export function buildRuntimeSystemPrompt(manifest: ProjectManifest): string {
+  // Normalize schema — handle both { tables: {...} } and direct { tableName: {...} } formats
+  const schema = manifest.schema
+    ? (manifest.schema as any).tables || manifest.schema
+    : {};
+
   return `You are a code generator for a ${manifest.framework} application using OnClaw.
 You generate React components that use a provided context API to query real data.
 
 ## Project Context
 - Framework: ${manifest.framework}
-- ORM: ${manifest.orm || "none"}
-- Database: ${manifest.database || "none"}
+- ORM: ${manifest.orm || (manifest as any).database?.orm || "none"}
+- Database: ${manifest.database || (manifest as any).database?.type || "none"}
 - Styling: ${typeof manifest.styling === "object" ? manifest.styling.framework || "tailwind" : manifest.styling || "tailwind"}
-- Auth: ${manifest.auth || manifest.authSystem || "none"}
+- Auth: ${manifest.auth || manifest.authSystem || (manifest as any).auth?.type || "none"}
 
 ## Database Schema
-${formatSchema(manifest.schema)}
+${formatSchema(schema)}
 
 ## Available Context API
 Generated components receive a \`ctx\` prop with these functions:
@@ -38,7 +43,7 @@ ${formatActions(manifest.actions)}
 - Match the app's existing visual style: ${manifest.uiPatterns?.theme || (typeof manifest.styling === "object" ? manifest.styling.theme : "dark")} theme, ${manifest.uiPatterns?.styling || "clean minimal"}
 
 ## Available Data Fields
-${formatDataFields(manifest.schema)}
+${formatDataFields(schema)}
 `;
 }
 
@@ -94,10 +99,11 @@ export interface PageDef {
 // ─── Formatters ─────────────────────────────────────────
 
 function formatSchema(schema: Record<string, TableSchema>): string {
-  if (!schema || Object.keys(schema).length === 0) return "No schema available.";
+  if (!schema || typeof schema !== "object" || Object.keys(schema).length === 0) return "No schema available.";
 
   return Object.entries(schema)
     .map(([table, def]) => {
+      if (!def || !def.columns) return `### ${table}\n  (no column info)`;
       // Handle columns as either array or object
       let colLines: string[];
       if (Array.isArray(def.columns)) {
@@ -151,7 +157,7 @@ function formatActions(actions: ActionDef[] | Record<string, any>): string {
 }
 
 function formatDataFields(schema: Record<string, TableSchema>): string {
-  if (!schema || Object.keys(schema).length === 0) return "No schema available.";
+  if (!schema || typeof schema !== "object" || Object.keys(schema).length === 0) return "No schema available.";
   return Object.entries(schema)
     .map(([table, def]) => {
       const colNames = Array.isArray(def.columns)

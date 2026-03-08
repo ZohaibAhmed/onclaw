@@ -316,6 +316,19 @@ async function handleGenerate(
 
   const body = await req.json();
   let { messages, max_tokens = 4096, stream: clientRequestsStream } = body;
+
+  // Handle legacy/direct prompt format: { prompt: "..." } → wrap into messages
+  if (!messages && body.prompt) {
+    messages = [{ role: "user", content: body.prompt }];
+  }
+
+  if (!messages || !Array.isArray(messages)) {
+    return jsonResponse(
+      { error: "Invalid request: 'messages' array is required" },
+      { status: 400 }
+    );
+  }
+
   const useStream = resolved.streaming || clientRequestsStream;
 
   // Enrich system prompt with project manifest if available
