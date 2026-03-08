@@ -1,11 +1,11 @@
 "use client";
 
-import { Shell, Slot, useClawKit } from "@/components/shell";
+import { Shell, Slot, useOnClaw } from "@/components/shell";
 import { formatCurrency, formatNumber, timeAgo, STAGE_COLORS } from "@/lib/format";
 import { useEffect, useState } from "react";
 
 function DynamicSlots() {
-  const { dynamicSlotIds, slots } = useClawKit();
+  const { dynamicSlotIds, slots } = useOnClaw();
   if (dynamicSlotIds.length === 0) return null;
   return (
     <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -11,8 +11,8 @@ import { dirname, join, normalize, relative } from "path";
 import { existsSync } from "fs";
 import type { ServerMutation, FileChange, ServerEngineConfig } from "./server-engine";
 
-const MUTATIONS_FILE = ".clawkit/mutations.json";
-const GENERATED_DIR = "src/clawkit/generated";
+const MUTATIONS_FILE = ".onclaw/mutations.json";
+const GENERATED_DIR = "src/onclaw/generated";
 const LOCK_TIMEOUT_MS = 10_000;
 
 // ─── File Lock (in-process) ─────────────────────────────
@@ -52,7 +52,7 @@ async function acquireLock(path: string): Promise<() => void> {
 export type ComponentScope = "personal" | "team" | "global";
 
 export interface MutationManagerConfig extends ServerEngineConfig {
-  /** Base directory for generated files (default: src/clawkit/generated) */
+  /** Base directory for generated files (default: src/onclaw/generated) */
   generatedDir?: string;
   /** Custom protected file patterns (merged with defaults) */
   protectedPatterns?: RegExp[];
@@ -99,7 +99,7 @@ export class MutationManager {
     /^tsconfig/,
     /^next\.config/,
     /^\.env/,
-    /^\.clawkit\/project\.json$/,
+    /^\.onclaw\/project\.json$/,
   ];
 
   private isProtected(path: string): boolean {
@@ -110,7 +110,7 @@ export class MutationManager {
   /**
    * Resolve a file path for a specific user.
    * All paths are forced into the user's namespace under the generated directory.
-   * e.g., "components/DealChart.tsx" → "src/clawkit/generated/user-123/components/DealChart.tsx"
+   * e.g., "components/DealChart.tsx" → "src/onclaw/generated/user-123/components/DealChart.tsx"
    */
   private resolveUserPath(filePath: string, userId: string): string {
     // Sanitize userId — only allow alphanumeric, dash, underscore
@@ -177,15 +177,15 @@ export class MutationManager {
     // Filter out protected files and validate paths
     mutation.files = mutation.files.filter((f) => {
       if (this.isProtected(f.path)) {
-        console.warn(`[ClawKit] Blocked modification of protected file: ${f.path}`);
+        console.warn(`[OnClaw] Blocked modification of protected file: ${f.path}`);
         return false;
       }
       if (!this.isPathSafe(f.path)) {
-        console.warn(`[ClawKit] Blocked path traversal attempt: ${f.path}`);
+        console.warn(`[OnClaw] Blocked path traversal attempt: ${f.path}`);
         return false;
       }
       if (f.content && f.content.length > this.maxFileSize) {
-        console.warn(`[ClawKit] File too large (${f.content.length} bytes): ${f.path}`);
+        console.warn(`[OnClaw] File too large (${f.content.length} bytes): ${f.path}`);
         return false;
       }
       return true;
@@ -218,7 +218,7 @@ export class MutationManager {
 
           if (file.action === "delete") {
             if (existsSync(fullPath)) {
-              const trashPath = join(this.appRoot, ".clawkit", "trash", file.path);
+              const trashPath = join(this.appRoot, ".onclaw", "trash", file.path);
               await mkdir(dirname(trashPath), { recursive: true });
               await rename(fullPath, trashPath);
             }

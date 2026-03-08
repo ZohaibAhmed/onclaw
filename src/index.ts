@@ -1,7 +1,7 @@
 // Core components
-export { ClawKitProvider, useClawKit } from "./components/provider";
+export { OnClawProvider, useOnClaw } from "./components/provider";
 export { Slot } from "./components/slot";
-export { ClawKitAdmin } from "./components/admin";
+export { OnClawAdmin } from "./components/admin";
 export { SandboxedComponent } from "./components/sandbox";
 export { DiffView } from "./components/diff-view";
 export { StyleEditor } from "./components/style-editor";
@@ -20,11 +20,11 @@ export { refinePrompt } from "./lib/smart-prompt";
 
 // Types
 export type {
-  ClawKitConfig,
-  ClawKitTheme,
-  ClawKitEvents,
-  ClawKitPlugin,
-  ClawKitAnalytics,
+  OnClawConfig,
+  OnClawTheme,
+  OnClawEvents,
+  OnClawPlugin,
+  OnClawAnalytics,
   RateLimitConfig,
   TemplateItem,
   SharePayload,

@@ -1,6 +1,6 @@
 import type { StoreAdapter, UserComponent } from "../types";
 
-const STORAGE_KEY = "clawkit:components";
+const STORAGE_KEY = "onclaw:components";
 
 export class LocalStoreAdapter implements StoreAdapter {
   async load(userId: string): Promise<UserComponent[]> {

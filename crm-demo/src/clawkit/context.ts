@@ -81,7 +81,7 @@ export type Activity = {
   dealName?: string;
 };
 
-export interface ClawKitContext {
+export interface OnClawContext {
   queries: {
     /**
      * Get all sales reps and team members
@@ -226,7 +226,7 @@ export interface ClawKitContext {
   };
 }
 
-export function createContext(): ClawKitContext {
+export function createContext(): OnClawContext {
   return {
     queries: {
       async getUsers(filters = {}) {

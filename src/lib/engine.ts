@@ -1,7 +1,7 @@
 import type { GenerateRequest, GenerateResponse, ConversationMessage } from "../types";
 import { transformJSX } from "./jsx-transform";
 
-const SYSTEM_PROMPT = `You are a React component generator for ClawKit. You generate self-contained React functional components.
+const SYSTEM_PROMPT = `You are a React component generator for OnClaw. You generate self-contained React functional components.
 
 CRITICAL RULES:
 - Output ONLY the component code — no markdown, no \`\`\`, no imports, no exports
@@ -205,7 +205,7 @@ export function compileComponent(
       // Fall through
     }
 
-    console.error("[ClawKit] Failed to compile component:", firstErr);
+    console.error("[OnClaw] Failed to compile component:", firstErr);
     return null;
   }
 }

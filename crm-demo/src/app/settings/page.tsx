@@ -1,7 +1,7 @@
 "use client";
 
 import { Shell } from "@/components/shell";
-import { ClawKitAdmin } from "clawkit";
+import { OnClawAdmin } from "onclaw";
 
 export default function SettingsPage() {
   return (
@@ -9,7 +9,7 @@ export default function SettingsPage() {
       <div className="p-6 space-y-6">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
-          <p className="text-sm text-slate-500 mt-1">App configuration & ClawKit analytics</p>
+          <p className="text-sm text-slate-500 mt-1">App configuration & OnClaw analytics</p>
         </div>
 
         <div className="grid grid-cols-2 gap-6">
@@ -47,8 +47,8 @@ export default function SettingsPage() {
           </div>
 
           <div className="bg-slate-900 rounded-xl border border-slate-800 p-5">
-            <h3 className="text-sm font-semibold mb-4">ClawKit Customization Analytics</h3>
-            <ClawKitAdmin />
+            <h3 className="text-sm font-semibold mb-4">OnClaw Customization Analytics</h3>
+            <OnClawAdmin />
           </div>
         </div>
       </div>

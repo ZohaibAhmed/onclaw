@@ -1,7 +1,7 @@
 /**
  * Server-side mutation engine.
  * This runs on your backend — generates real files, API routes, server components.
- * NOT bundled into the client; import from "clawkit/server".
+ * NOT bundled into the client; import from "onclaw/server".
  */
 
 import type { SlotConfig } from "../types";
@@ -43,7 +43,7 @@ export interface ServerEngineConfig {
   onMutationSaved?: (mutation: ServerMutation) => Promise<void>;
 }
 
-const SERVER_SYSTEM_PROMPT = `You are a Next.js code generator for ClawKit server-side mutations.
+const SERVER_SYSTEM_PROMPT = `You are a Next.js code generator for OnClaw server-side mutations.
 You generate real, production-quality Next.js code that will be written to the filesystem.
 You ALSO generate a client-renderable preview version for instant display.
 

@@ -1,12 +1,12 @@
 {
-  "name": "clawkit",
+  "name": "onclaw",
   "version": "0.1.0",
   "description": "AI-powered SaaS customization — let users reshape your app with natural language. One line of code.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "bin": {
-    "clawkit": "./dist/cli/init.mjs"
+    "onclaw": "./dist/cli/init.mjs"
   },
   "exports": {
     ".": {
@@ -64,11 +64,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/ZohaibAhmed/clawkit"
+    "url": "https://github.com/ZohaibAhmed/onclaw"
   },
-  "homepage": "https://github.com/ZohaibAhmed/clawkit#readme",
+  "homepage": "https://github.com/ZohaibAhmed/onclaw#readme",
   "bugs": {
-    "url": "https://github.com/ZohaibAhmed/clawkit/issues"
+    "url": "https://github.com/ZohaibAhmed/onclaw/issues"
   },
   "author": "Zohaib Ahmed <zohaib@resemble.ai>",
   "license": "MIT",

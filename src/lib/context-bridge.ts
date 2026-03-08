@@ -2,11 +2,11 @@
  * Context Bridge — Client-side proxy for the server-side context API.
  *
  * Generated components call `ctx.queries.getDeals()` which gets proxied
- * to `/api/clawkit/context` on the server, executing the real query functions.
+ * to `/api/onclaw/context` on the server, executing the real query functions.
  */
 
 export interface ContextBridgeConfig {
-  /** Context API endpoint (default: /api/clawkit/context) */
+  /** Context API endpoint (default: /api/onclaw/context) */
   endpoint?: string;
   /** Additional headers (e.g., auth tokens) */
   headers?: Record<string, string>;
@@ -24,7 +24,7 @@ interface CacheEntry {
  * Generated components use this like: `const deals = await ctx.queries.getDeals({ stage: "won" })`
  */
 export function createContextBridge(config: ContextBridgeConfig = {}) {
-  const endpoint = config.endpoint || "/api/clawkit/context";
+  const endpoint = config.endpoint || "/api/onclaw/context";
   const cacheTtl = config.cacheTtlMs ?? 30000;
   const cache = new Map<string, CacheEntry>();
 

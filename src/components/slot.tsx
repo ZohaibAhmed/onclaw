@@ -1,7 +1,7 @@
 "use client";
 
 import React, { Component, type ErrorInfo, type ReactNode, useEffect, useRef, useState } from "react";
-import { useClawKit } from "./provider";
+import { useOnClaw } from "./provider";
 
 /** Error boundary for user-generated components */
 class SlotErrorBoundary extends Component<
@@ -15,7 +15,7 @@ class SlotErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error(`[ClawKit] Slot "${this.props.slotId}" error:`, error, info);
+    console.error(`[OnClaw] Slot "${this.props.slotId}" error:`, error, info);
   }
 
   render() {
@@ -110,7 +110,7 @@ export function Slot({
   style,
   noTransition = false,
 }: SlotProps) {
-  const { getSlotComponent, open, highlightedSlots, slots, components } = useClawKit();
+  const { getSlotComponent, open, highlightedSlots, slots, components } = useOnClaw();
   const [hovered, setHovered] = React.useState(false);
   const UserComp = getSlotComponent(id);
   const isCustomized = !!components.find((c) => c.slotId === id);
@@ -139,7 +139,7 @@ export function Slot({
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      data-clawkit-slot={id}
+      data-onclaw-slot={id}
     >
       <SlotErrorBoundary slotId={id} onEdit={() => open(id)}>
         {wrapped}

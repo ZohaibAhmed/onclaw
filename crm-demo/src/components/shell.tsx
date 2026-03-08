@@ -1,6 +1,6 @@
 "use client";
 
-import { ClawKitProvider, Slot, useClawKit } from "clawkit";
+import { OnClawProvider, Slot, useOnClaw } from "onclaw";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -29,10 +29,10 @@ const CRM_SLOTS = {
 
 export function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <ClawKitProvider
+    <OnClawProvider
       userId="crm-demo-user"
-      endpoint="/api/clawkit/generate"
-      streamEndpoint="/api/clawkit/stream"
+      endpoint="/api/onclaw/generate"
+      streamEndpoint="/api/onclaw/stream"
       multiSlot={true}
       smartPrompts={true}
       slots={CRM_SLOTS}
@@ -44,7 +44,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
-    </ClawKitProvider>
+    </OnClawProvider>
   );
 }
 
@@ -96,4 +96,4 @@ function Sidebar() {
   );
 }
 
-export { Slot, useClawKit };
+export { Slot, useOnClaw };

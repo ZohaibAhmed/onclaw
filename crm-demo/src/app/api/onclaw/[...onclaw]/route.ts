@@ -1,7 +1,7 @@
-import { createClawKitHandler } from "clawkit/next";
-import { createContext } from "@/clawkit/context";
+import { createOnClawHandler } from "onclaw/next";
+import { createContext } from "@/onclaw/context";
 
-export const { GET, POST } = createClawKitHandler({
+export const { GET, POST } = createOnClawHandler({
   provider: "anthropic",
   apiKey: process.env.ANTHROPIC_API_KEY!,
   model: "claude-sonnet-4-20250514",

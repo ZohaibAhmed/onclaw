@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useClawKit } from "./provider";
+import { useOnClaw } from "./provider";
 
 const ICONS = {
   success: "✓",
@@ -16,7 +16,7 @@ const COLORS = {
 };
 
 export function Toast() {
-  const { toasts, dismissToast } = useClawKit();
+  const { toasts, dismissToast } = useOnClaw();
 
   if (toasts.length === 0) return null;
 

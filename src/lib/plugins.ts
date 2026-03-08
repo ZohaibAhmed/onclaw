@@ -1,11 +1,11 @@
-import type { ClawKitPlugin, SlotConfig } from "../types";
+import type { OnClawPlugin, SlotConfig } from "../types";
 
 /**
  * Run all plugin beforeGenerate hooks in sequence.
  * Each plugin can transform the prompt.
  */
 export async function runBeforeGenerate(
-  plugins: ClawKitPlugin[],
+  plugins: OnClawPlugin[],
   ctx: {
     prompt: string;
     slotId: string;
@@ -27,7 +27,7 @@ export async function runBeforeGenerate(
  * Each plugin can transform the generated code.
  */
 export async function runAfterGenerate(
-  plugins: ClawKitPlugin[],
+  plugins: OnClawPlugin[],
   ctx: { code: string; prompt: string; slotId: string }
 ): Promise<string> {
   let code = ctx.code;
@@ -44,7 +44,7 @@ export async function runAfterGenerate(
  * Returns the first validation error, or null if all pass.
  */
 export async function runValidate(
-  plugins: ClawKitPlugin[],
+  plugins: OnClawPlugin[],
   ctx: { code: string; slotId: string }
 ): Promise<string | null> {
   for (const plugin of plugins) {
@@ -60,7 +60,7 @@ export async function runValidate(
  * Apply all plugin wrapComponent hooks to a component.
  */
 export function runWrapComponent(
-  plugins: ClawKitPlugin[],
+  plugins: OnClawPlugin[],
   Component: React.ComponentType<Record<string, unknown>>,
   slotId: string
 ): React.ComponentType<Record<string, unknown>> {

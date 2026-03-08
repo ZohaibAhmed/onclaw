@@ -1,4 +1,4 @@
-# ClawKit ⚡
+# OnClaw ⚡
 
 **Every user gets their own version of your app.**
 
@@ -7,14 +7,14 @@ An open-source React library that turns any SaaS into a per-user platform. Users
 ## Setup
 
 ```bash
-npm install clawkit
-npx clawkit init
+npm install onclaw
+npx onclaw init
 ```
 
 The init command uses AI to scan your project — finds your schema, ORM, auth, and pages — then generates everything you need:
 
-- **`.clawkit/project.json`** — Project manifest (schema, relations, UI patterns) injected into every LLM prompt
-- **`src/clawkit/context.ts`** — Typed query/action functions that act as the security boundary
+- **`.onclaw/project.json`** — Project manifest (schema, relations, UI patterns) injected into every LLM prompt
+- **`src/onclaw/context.ts`** — Typed query/action functions that act as the security boundary
 - **API route** — Wired to your auth with rate limiting
 
 ## Manual Setup
@@ -22,10 +22,10 @@ The init command uses AI to scan your project — finds your schema, ORM, auth, 
 ### 1. API route
 
 ```ts
-// app/api/clawkit/[...clawkit]/route.ts
-import { createClawKitHandler } from "clawkit/next";
+// app/api/onclaw/[...onclaw]/route.ts
+import { createOnClawHandler } from "onclaw/next";
 
-export const { GET, POST } = createClawKitHandler({
+export const { GET, POST } = createOnClawHandler({
   provider: "anthropic",
   apiKey: process.env.ANTHROPIC_API_KEY!,
 });
@@ -35,17 +35,17 @@ export const { GET, POST } = createClawKitHandler({
 
 ```tsx
 "use client";
-import { ClawKitProvider, Slot } from "clawkit";
+import { OnClawProvider, Slot } from "onclaw";
 
 export default function Page() {
   return (
-    <ClawKitProvider userId="user-123" slots={{
+    <OnClawProvider userId="user-123" slots={{
       hero: { name: "Hero Section", description: "Main hero banner" },
       metrics: { name: "Key Metrics", description: "Dashboard stats" },
     }}>
       <Slot id="hero"><h1>Default hero</h1></Slot>
       <Slot id="metrics"><p>Default metrics</p></Slot>
-    </ClawKitProvider>
+    </OnClawProvider>
   );
 }
 ```
@@ -57,7 +57,7 @@ Users press `⌘K` and customize any `<Slot>` — or create entirely new compone
 The killer feature. Generated components query your actual database through typed functions you control:
 
 ```ts
-// src/clawkit/context.ts
+// src/onclaw/context.ts
 export function createContext() {
   return {
     queries: {
@@ -75,7 +75,7 @@ export function createContext() {
 
 ```ts
 // route.ts
-export const { GET, POST } = createClawKitHandler({
+export const { GET, POST } = createOnClawHandler({
   provider: "anthropic",
   apiKey: process.env.ANTHROPIC_API_KEY!,
   context: createContext(),
@@ -92,7 +92,7 @@ User asks "show me top deals by value" → LLM generates a component calling `ct
 
 ## How It Works
 
-1. **`npx clawkit init`** — AI scans your project, generates integration files
+1. **`npx onclaw init`** — AI scans your project, generates integration files
 2. **User presses `⌘K`** — Describes what they want
 3. **LLM generates a React component** — Enriched with your schema and available queries
 4. **Component renders instantly** — Real data via context bridge
@@ -109,21 +109,21 @@ User asks "show me top deals by value" → LLM generates a component calling `ct
 
 ## API
 
-### `clawkit` (client)
+### `onclaw` (client)
 
-`ClawKitProvider` · `Slot` · `useClawKit` · `createContextBridge` · `ClawKitAdmin` · `SandboxedComponent` · `DiffView` · `StyleEditor` · `LocalStoreAdapter` · `APIStoreAdapter`
+`OnClawProvider` · `Slot` · `useOnClaw` · `createContextBridge` · `OnClawAdmin` · `SandboxedComponent` · `DiffView` · `StyleEditor` · `LocalStoreAdapter` · `APIStoreAdapter`
 
-### `clawkit/next` (server)
+### `onclaw/next` (server)
 
-`createClawKitHandler` — catch-all route handler with auth, rate limiting, context API, manifest enrichment
+`createOnClawHandler` — catch-all route handler with auth, rate limiting, context API, manifest enrichment
 
-### `clawkit/server`
+### `onclaw/server`
 
 `MutationManager` · `generateServerMutation` — file mutations with rollback
 
 ### CLI
 
-`npx clawkit init` — AI-powered setup via Claude Agent SDK
+`npx onclaw init` — AI-powered setup via Claude Agent SDK
 
 ## Requirements
 

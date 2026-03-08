@@ -22,7 +22,7 @@ export default defineConfig([
     external: ["react", "react-dom", "fs", "fs/promises", "path"],
     platform: "node",
   },
-  // CLI bundle (npx clawkit init)
+  // CLI bundle (npx onclaw init)
   {
     entry: ["src/cli/init.ts"],
     format: ["esm"],

@@ -10,8 +10,8 @@ import React, {
   useState,
 } from "react";
 import type {
-  ClawKitConfig,
-  ClawKitTheme,
+  OnClawConfig,
+  OnClawTheme,
   ConversationMessage,
   TemplateItem,
   UserComponent,
@@ -52,9 +52,9 @@ export interface ToastMessage {
   message: string;
 }
 
-interface ClawKitContextValue {
+interface OnClawContextValue {
   userId: string;
-  config: ClawKitConfig;
+  config: OnClawConfig;
   components: UserComponent[];
   isOpen: boolean;
   isGenerating: boolean;
@@ -93,18 +93,18 @@ interface ClawKitContextValue {
   ctxBridge: any;
 }
 
-const ClawKitContext = createContext<ClawKitContextValue | null>(null);
+const OnClawContext = createContext<OnClawContextValue | null>(null);
 
-export function useClawKit() {
-  const ctx = useContext(ClawKitContext);
+export function useOnClaw() {
+  const ctx = useContext(OnClawContext);
   if (!ctx)
-    throw new Error("useClawKit must be used within a ClawKitProvider");
+    throw new Error("useOnClaw must be used within a OnClawProvider");
   return ctx;
 }
 
 // ─── Theme ──────────────────────────────────────────────
 
-const DARK_THEME: ClawKitTheme = {
+const DARK_THEME: OnClawTheme = {
   "--ck-bg": "hsl(0 0% 3.9%)",
   "--ck-bg-secondary": "hsl(0 0% 9%)",
   "--ck-bg-hover": "hsl(0 0% 14.9%)",
@@ -120,7 +120,7 @@ const DARK_THEME: ClawKitTheme = {
     '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
 };
 
-const LIGHT_THEME: ClawKitTheme = {
+const LIGHT_THEME: OnClawTheme = {
   "--ck-bg": "hsl(0 0% 100%)",
   "--ck-bg-secondary": "hsl(0 0% 96%)",
   "--ck-bg-hover": "hsl(0 0% 92%)",
@@ -136,7 +136,7 @@ const LIGHT_THEME: ClawKitTheme = {
     '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
 };
 
-function useThemeDetection(mode: "light" | "dark" | "auto"): ClawKitTheme {
+function useThemeDetection(mode: "light" | "dark" | "auto"): OnClawTheme {
   const [isDark, setIsDark] = useState(mode === "dark");
 
   useEffect(() => {
@@ -186,7 +186,7 @@ function autoDetectSlot(
 
 // ─── Rate limiter ───────────────────────────────────────
 
-function useRateLimiter(config: ClawKitConfig) {
+function useRateLimiter(config: OnClawConfig) {
   const timestampsRef = useRef<number[]>([]);
 
   const check = useCallback((): { allowed: boolean; remaining: number } => {
@@ -214,10 +214,10 @@ function useRateLimiter(config: ClawKitConfig) {
 
 // ─── Provider ───────────────────────────────────────────
 
-export function ClawKitProvider({
+export function OnClawProvider({
   children,
   ...config
-}: ClawKitConfig & { children: React.ReactNode }) {
+}: OnClawConfig & { children: React.ReactNode }) {
   const store = useMemo(
     () => config.store ?? new LocalStoreAdapter(),
     [config.store]
@@ -258,7 +258,7 @@ export function ClawKitProvider({
   const ctxBridge = useMemo(() => {
     const endpoint = config.endpoint
       ? config.endpoint.replace(/\/generate$/, "/context").replace(/\/stream$/, "/context")
-      : "/api/clawkit/context";
+      : "/api/onclaw/context";
     return createContextBridge({ endpoint });
   }, [config.endpoint]);
 
@@ -519,7 +519,7 @@ export function ClawKitProvider({
         if (mode === "server") {
           await generateServer(refinedPrompt, resolvedSlot);
         } else {
-          const endpoint = config.endpoint ?? "/api/clawkit/generate";
+          const endpoint = config.endpoint ?? "/api/onclaw/generate";
           const streamEndpoint = config.streamEndpoint;
           const request = {
             prompt: refinedPrompt,
@@ -608,7 +608,7 @@ export function ClawKitProvider({
           userId: config.userId,
           error: msg,
         });
-        console.error("[ClawKit]", err);
+        console.error("[OnClaw]", err);
       } finally {
         setIsGenerating(false);
         setStreamingCode("");
@@ -648,7 +648,7 @@ export function ClawKitProvider({
         for (const slotId of slotIds) {
           const slotConfig = mergedSlots[slotId];
           const existing = components.find((c) => c.slotId === slotId);
-          const endpoint = config.endpoint ?? "/api/clawkit/generate";
+          const endpoint = config.endpoint ?? "/api/onclaw/generate";
 
           setGenerationStage("generating");
           addToast(
@@ -696,7 +696,7 @@ export function ClawKitProvider({
         const msg =
           err instanceof Error ? err.message : "Multi-slot generation failed";
         addToast("error", `${msg} (${completed}/${slotIds.length} completed)`);
-        console.error("[ClawKit]", err);
+        console.error("[OnClaw]", err);
       } finally {
         setIsGenerating(false);
       }
@@ -737,7 +737,7 @@ export function ClawKitProvider({
       const comp = components.find((c) => c.slotId === slotId);
       if (!comp) return null;
 
-      return `// ClawKit Generated Component
+      return `// OnClaw Generated Component
 // Slot: ${slotId}
 // Prompt: "${comp.prompt}"
 // Generated: ${new Date(comp.updatedAt).toISOString()}
@@ -896,7 +896,7 @@ export default Component;`;
     []
   );
 
-  const value: ClawKitContextValue = {
+  const value: OnClawContextValue = {
     userId: config.userId,
     config,
     components,
@@ -936,9 +936,9 @@ export default Component;`;
   };
 
   return (
-    <ClawKitContext.Provider value={value}>
+    <OnClawContext.Provider value={value}>
       <div
-        className="clawkit-root"
+        className="onclaw-root"
         style={theme as React.CSSProperties}
       >
         {children}
@@ -950,6 +950,6 @@ export default Component;`;
           </>
         )}
       </div>
-    </ClawKitContext.Provider>
+    </OnClawContext.Provider>
   );
 }

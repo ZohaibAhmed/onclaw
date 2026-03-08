@@ -1,26 +1,26 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { useClawKit } from "./provider";
-import type { ClawKitAnalytics } from "../types";
+import { useOnClaw } from "./provider";
+import type { OnClawAnalytics } from "../types";
 
 /**
  * Built-in admin analytics panel.
  * Shows generation stats, popular slots, recent prompts.
  *
- * Usage: <ClawKitAdmin />
- * Must be inside a <ClawKitProvider>.
+ * Usage: <OnClawAdmin />
+ * Must be inside a <OnClawProvider>.
  */
-export function ClawKitAdmin({
+export function OnClawAdmin({
   style,
   className,
 }: {
   style?: React.CSSProperties;
   className?: string;
 }) {
-  const { components, slots, config } = useClawKit();
+  const { components, slots, config } = useOnClaw();
 
-  const analytics = useMemo<ClawKitAnalytics>(() => {
+  const analytics = useMemo<OnClawAnalytics>(() => {
     const perSlot: Record<string, number> = {};
     const recentPrompts: { prompt: string; slotId: string; timestamp: number }[] = [];
 
@@ -83,7 +83,7 @@ export function ClawKitAdmin({
           <path d="M3 3v18h18" />
           <path d="M7 16l4-8 4 4 4-12" />
         </svg>
-        ClawKit Analytics
+        OnClaw Analytics
       </h2>
 
       {/* Stat cards */}

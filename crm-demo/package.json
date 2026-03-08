@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@faker-js/faker": "^10.3.0",
-    "clawkit": "file:..",
+    "onclaw": "file:..",
     "drizzle-orm": "^0.45.1",
     "next": "16.1.6",
     "postgres": "^3.4.8",

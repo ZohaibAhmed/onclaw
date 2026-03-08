@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "SalesForge CRM",
-  description: "AI-powered sales CRM with ClawKit",
+  description: "AI-powered sales CRM with OnClaw",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

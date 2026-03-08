@@ -1,10 +1,10 @@
 /**
  * System prompt templates used during runtime generation.
- * These get enriched with the project manifest from .clawkit/project.json.
+ * These get enriched with the project manifest from .onclaw/project.json.
  */
 
 export function buildRuntimeSystemPrompt(manifest: ProjectManifest): string {
-  return `You are a code generator for a ${manifest.framework} application using ClawKit.
+  return `You are a code generator for a ${manifest.framework} application using OnClaw.
 You generate React components that use a provided context API to query real data.
 
 ## Project Context

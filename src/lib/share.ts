@@ -58,7 +58,7 @@ export async function generateShareUrl(
   // Client-side: encode in hash fragment
   const encoded = encodeSharePayload(payload);
   const baseUrl = typeof window !== "undefined" ? window.location.origin + window.location.pathname : "";
-  return `${baseUrl}#clawkit=${encoded}`;
+  return `${baseUrl}#onclaw=${encoded}`;
 }
 
 /**
@@ -67,7 +67,7 @@ export async function generateShareUrl(
 export function parseShareFromUrl(): SharePayload | null {
   if (typeof window === "undefined") return null;
   const hash = window.location.hash;
-  const match = hash.match(/#clawkit=(.+)/);
+  const match = hash.match(/#onclaw=(.+)/);
   if (!match) return null;
   return decodeSharePayload(match[1]);
 }

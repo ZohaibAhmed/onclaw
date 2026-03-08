@@ -1,7 +1,7 @@
 "use client";
 
-import { ClawKitProvider, Slot, useClawKit } from "clawkit";
-import type { TemplateItem, ClawKitEvents } from "clawkit";
+import { OnClawProvider, Slot, useOnClaw } from "onclaw";
+import type { TemplateItem, OnClawEvents } from "onclaw";
 
 const templates: TemplateItem[] = [
   {
@@ -125,23 +125,23 @@ const templates: TemplateItem[] = [
   },
 ];
 
-const events: ClawKitEvents = {
+const events: OnClawEvents = {
   onGenerateStart: ({ prompt, slotId, userId }) => {
-    console.log("[ClawKit Analytics] Generation started:", { prompt, slotId, userId, timestamp: Date.now() });
+    console.log("[OnClaw Analytics] Generation started:", { prompt, slotId, userId, timestamp: Date.now() });
   },
   onGenerateComplete: ({ prompt, slotId, durationMs }) => {
-    console.log("[ClawKit Analytics] Generation complete:", { prompt, slotId, durationMs });
+    console.log("[OnClaw Analytics] Generation complete:", { prompt, slotId, durationMs });
   },
   onError: ({ error, slotId }) => {
-    console.error("[ClawKit Analytics] Error:", { error, slotId });
+    console.error("[OnClaw Analytics] Error:", { error, slotId });
   },
   onSlotChange: ({ slotId, action }) => {
-    console.log("[ClawKit Analytics] Slot changed:", { slotId, action });
+    console.log("[OnClaw Analytics] Slot changed:", { slotId, action });
   },
 };
 
 function DynamicSlots() {
-  const { dynamicSlotIds, slots } = useClawKit();
+  const { dynamicSlotIds, slots } = useOnClaw();
   if (dynamicSlotIds.length === 0) return null;
   return (
     <div className="mt-8 space-y-6">
@@ -160,10 +160,10 @@ function DynamicSlots() {
 
 export default function Home() {
   return (
-    <ClawKitProvider
+    <OnClawProvider
       userId="demo-user-1"
-      endpoint="/api/clawkit/generate"
-      streamEndpoint="/api/clawkit/stream"
+      endpoint="/api/onclaw/generate"
+      streamEndpoint="/api/onclaw/stream"
       serverUrl="/api/server-mutate"
       theme="dark"
       multiSlot={true}
@@ -222,7 +222,7 @@ export default function Home() {
             <section className="py-16 text-center">
               <div className="mx-auto max-w-2xl">
                 <div className="mb-4 inline-block rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-neutral-400">
-                  Powered by ClawKit
+                  Powered by OnClaw
                 </div>
                 <h1 className="mb-4 text-5xl font-bold tracking-tight">
                   Build your perfect
@@ -319,6 +319,6 @@ export default function Home() {
           <DynamicSlots />
         </main>
       </div>
-    </ClawKitProvider>
+    </OnClawProvider>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useClawKit, type GenerationStage } from "./provider";
+import { useOnClaw, type GenerationStage } from "./provider";
 import { compileComponent } from "../lib/engine";
 import { getSuggestions, type PromptSuggestion } from "../lib/suggestions";
 import { DiffView } from "./diff-view";
@@ -55,7 +55,7 @@ export function CommandBar() {
     dynamicSlotIds,
     applyStyleOverrides,
     styleOverrides,
-  } = useClawKit();
+  } = useOnClaw();
 
   const [input, setInput] = useState("");
   const [view, setView] = useState<View>("prompt");
@@ -794,7 +794,7 @@ export function CommandBar() {
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <span style={{ fontSize: "11px", color: "var(--ck-text-muted)", opacity: 0.5 }}>
-                ClawKit
+                OnClaw
               </span>
               {rateLimitRemaining < Infinity && rateLimitRemaining <= 3 && (
                 <span style={{ fontSize: "10px", color: rateLimitRemaining === 0 ? "#ef4444" : "#f59e0b" }}>
@@ -838,7 +838,7 @@ export function CommandBar() {
 // ─── Live Preview Component ─────────────────────────────
 
 function LivePreview({ code }: { code: string }) {
-  const { ctxBridge } = useClawKit();
+  const { ctxBridge } = useOnClaw();
   const [rendered, setRendered] = useState<React.ReactNode>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -868,7 +868,7 @@ function LivePreview({ code }: { code: string }) {
 // ─── Streaming Preview (attempts compile periodically) ──
 
 function StreamingPreview({ code }: { code: string }) {
-  const { ctxBridge } = useClawKit();
+  const { ctxBridge } = useOnClaw();
   const [rendered, setRendered] = useState<React.ReactNode>(null);
 
   useEffect(() => {

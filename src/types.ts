@@ -38,7 +38,7 @@ export interface StoreAdapter {
 
 // ─── Event hooks / analytics ────────────────────────────
 
-export interface ClawKitEvents {
+export interface OnClawEvents {
   /** Fired when a generation starts */
   onGenerateStart?: (event: {
     prompt: string;
@@ -104,26 +104,26 @@ export interface TemplateItem {
   tags?: string[];
 }
 
-// ─── Main ClawKit configuration ─────────────────────────
+// ─── Main OnClaw configuration ─────────────────────────
 
-export interface ClawKitConfig {
+export interface OnClawConfig {
   /** User identifier — your app provides this */
   userId: string;
 
   /**
    * Generation endpoint URL.
-   * Your backend proxies to any LLM. Use `createClawKitHandler` from "clawkit/next" for a one-liner.
+   * Your backend proxies to any LLM. Use `createOnClawHandler` from "onclaw/next" for a one-liner.
    * Receives: { messages, max_tokens }
    * Returns: { choices: [{ message: { content } }] }
-   * @default "/api/clawkit/generate"
+   * @default "/api/onclaw/generate"
    */
   endpoint?: string;
 
   /**
    * Streaming generation endpoint.
-   * If set, ClawKit will use SSE streaming for real-time token display.
+   * If set, OnClaw will use SSE streaming for real-time token display.
    * Should return `text/event-stream` with `data: {"token": "..."}` events.
-   * Use `createClawKitHandler` with `streaming: true` from "clawkit/next".
+   * Use `createOnClawHandler` with `streaming: true` from "onclaw/next".
    */
   streamEndpoint?: string;
 
@@ -140,7 +140,7 @@ export interface ClawKitConfig {
   theme?: "light" | "dark" | "auto";
 
   /** Custom theme variable overrides */
-  themeOverrides?: Partial<ClawKitTheme>;
+  themeOverrides?: Partial<OnClawTheme>;
 
   /** Hide the floating trigger button */
   hideTrigger?: boolean;
@@ -149,7 +149,7 @@ export interface ClawKitConfig {
   shortcut?: string;
 
   /** Event hooks for analytics, moderation, logging */
-  events?: ClawKitEvents;
+  events?: OnClawEvents;
 
   /** Rate limiting configuration */
   rateLimit?: RateLimitConfig;
@@ -161,7 +161,7 @@ export interface ClawKitConfig {
   multiSlot?: boolean;
 
   /** Plugins for custom transforms, validators, and wrappers */
-  plugins?: ClawKitPlugin[];
+  plugins?: OnClawPlugin[];
 
   /** Run generated components in iframe sandbox for security */
   sandbox?: boolean;
@@ -182,7 +182,7 @@ export interface SlotConfig {
   availableProps?: Record<string, string>;
 }
 
-export interface ClawKitTheme {
+export interface OnClawTheme {
   "--ck-bg": string;
   "--ck-bg-secondary": string;
   "--ck-bg-hover": string;
@@ -218,7 +218,7 @@ export interface GenerateResponse {
 
 // ─── Plugin system ──────────────────────────────────────
 
-export interface ClawKitPlugin {
+export interface OnClawPlugin {
   /** Unique plugin name */
   name: string;
   /** Transform the prompt before sending to LLM */
@@ -258,14 +258,14 @@ export interface SharePayload {
   /** Slot config */
   slotConfig?: SlotConfig;
   /** Theme overrides at time of creation */
-  themeOverrides?: Partial<ClawKitTheme>;
+  themeOverrides?: Partial<OnClawTheme>;
   /** Timestamp */
   createdAt: number;
 }
 
 // ─── Admin analytics ────────────────────────────────────
 
-export interface ClawKitAnalytics {
+export interface OnClawAnalytics {
   /** Total generations */
   totalGenerations: number;
   /** Generations per slot */

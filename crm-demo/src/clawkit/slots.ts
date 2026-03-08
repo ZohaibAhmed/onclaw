@@ -1,7 +1,7 @@
 /**
- * ClawKit Slot Definitions
+ * OnClaw Slot Definitions
  *
- * These slot definitions tell ClawKit what UI components can be generated
+ * These slot definitions tell OnClaw what UI components can be generated
  * for each section of the CRM application. The LLM uses these descriptions
  * to understand the context and data available for each slot.
  */

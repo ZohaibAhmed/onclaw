@@ -98,7 +98,7 @@ try {
         overflow: "hidden",
         transition: "height 0.2s ease",
       }}
-      title="ClawKit Sandbox"
+      title="OnClaw Sandbox"
     />
   );
 }

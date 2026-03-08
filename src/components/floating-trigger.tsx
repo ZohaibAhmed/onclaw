@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { useClawKit } from "./provider";
+import { useOnClaw } from "./provider";
 
 export function FloatingTrigger() {
-  const { open, isOpen } = useClawKit();
+  const { open, isOpen } = useOnClaw();
   const [hovered, setHovered] = useState(false);
 
   if (isOpen) return null;
@@ -14,7 +14,7 @@ export function FloatingTrigger() {
       onClick={() => open()}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      aria-label="Open ClawKit"
+      aria-label="Open OnClaw"
       style={{
         position: "fixed",
         bottom: "24px",

@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import {
   generateServerMutation,
   MutationManager,
-} from "clawkit/server";
-import type { ServerEngineConfig } from "clawkit/server";
+} from "onclaw/server";
+import type { ServerEngineConfig } from "onclaw/server";
 import { join } from "path";
 
 
@@ -15,7 +15,7 @@ const config: ServerEngineConfig = {
   llmEndpoint: "http://localhost:3777/api/generate",
   onMutationApplied: async (mutation) => {
     console.log(
-      `[ClawKit] Mutation ${mutation.id} applied: ${mutation.files.length} files`
+      `[OnClaw] Mutation ${mutation.id} applied: ${mutation.files.length} files`
     );
   },
 };
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
       clientCode: result.clientCode,
     });
   } catch (err) {
-    console.error("[ClawKit] Server mutation error:", err);
+    console.error("[OnClaw] Server mutation error:", err);
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Unknown error" },
       { status: 500 }
