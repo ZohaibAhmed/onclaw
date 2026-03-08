@@ -1,38 +1,36 @@
 import type { GenerateRequest, GenerateResponse, ConversationMessage } from "../types";
 import { transformJSX } from "./jsx-transform";
 
-const SYSTEM_PROMPT = `You are a React component generator for OnClaw. You generate self-contained React functional components.
+const SYSTEM_PROMPT = `You are a React component modifier for OnClaw. You make MINIMAL, SURGICAL changes to existing components based on user requests.
 
-CRITICAL RULES:
-- Output ONLY the component code — no markdown, no \`\`\`, no imports, no exports
-- React is available as a global — use React.useState, React.useEffect, React.createElement, etc.
+## Core Principle: MODIFY, DON'T REBUILD
+You will receive the ORIGINAL component code. Your job is to ADD the requested feature while keeping EVERYTHING else exactly the same — same structure, same styles, same colors, same layout. If the user asks to "add a pinned messages sidebar", you add ONLY the pinned messages sidebar to the existing component. Do NOT rewrite the whole thing.
+
+## Rules
+- Output ONLY the component code — no markdown, no \`\`\`, no explanations
+- React is available as a global — use React.useState, React.useEffect, etc.
 - Assign the component to \`const Component\`
-- You may use JSX syntax — it will be automatically transpiled
-- Use inline styles with clean, modern aesthetics and good spacing
-- Use these CSS variables for theming: var(--ck-bg), var(--ck-text), var(--ck-text-muted), var(--ck-accent), var(--ck-border), var(--ck-radius), var(--ck-bg-secondary), var(--ck-bg-hover), var(--ck-font)
+- JSX syntax is supported — it will be automatically transpiled
 - The component receives a \`props\` object
-- Make it responsive and polished — use good typography, whitespace, and visual hierarchy
 - No external dependencies — vanilla React only
-- A \`ctx\` object is available as a global with \`ctx.queries\` and \`ctx.actions\` for real data access
-- Use ctx.queries to fetch real data: e.g., \`const [data, setData] = React.useState([]); React.useEffect(() => { ctx.queries.getDeals().then(setData); }, []);\`
-- If ctx.queries has the data you need, USE IT instead of mock data — this gives real, live data
-- Fall back to realistic mock/hardcoded data only if no relevant query exists
-- Use React.createElement for all elements (no JSX transpiler is available at runtime)
+- \`ctx\` object is available as a global with \`ctx.queries\` and \`ctx.actions\` for real data access
+- Use ctx.queries for real data when available; fall back to mock data only if no relevant query exists
 
-Example:
-const Component = (props) => {
-  const [count, setCount] = React.useState(0);
-  return React.createElement("div", { 
-    style: { padding: "1.5rem", background: "var(--ck-bg-secondary)", borderRadius: "var(--ck-radius)", border: "1px solid var(--ck-border)", color: "var(--ck-text)", fontFamily: "var(--ck-font)" }
-  }, 
-    React.createElement("h2", { style: { margin: "0 0 0.5rem", fontSize: "1.25rem", fontWeight: 600 } }, "Hello"),
-    React.createElement("p", { style: { margin: 0, color: "var(--ck-text-muted)", fontSize: "0.875rem" } }, "Count: " + count),
-    React.createElement("button", { 
-      onClick: () => setCount(c => c + 1),
-      style: { marginTop: "1rem", padding: "0.5rem 1rem", background: "var(--ck-accent)", color: "#fff", border: "none", borderRadius: "var(--ck-radius)", cursor: "pointer", fontSize: "0.875rem" }
-    }, "Increment")
-  );
-};`;
+## Style Rules (CRITICAL)
+- MATCH the existing component's visual style EXACTLY — same colors, same spacing, same fonts
+- If the original uses hardcoded colors (e.g. #121212, bg-[#19171D]), use those SAME colors in new elements
+- If the original uses Tailwind classes, use Tailwind classes
+- If the original uses inline styles, use inline styles
+- Do NOT introduce CSS variables (var(--ck-*)) unless the original already uses them
+- New elements should look like they were ALWAYS part of the original design
+- When in doubt, copy the exact styling patterns from the surrounding code
+
+## Modification Rules
+- PRESERVE all existing functionality — don't remove or break anything
+- ADD only what the user asked for
+- Keep the same component structure — don't reorganize or refactor
+- If adding a new section (e.g. sidebar), slot it into the existing layout naturally
+- Match the existing naming conventions and code patterns`;
 
 function buildMessages(request: GenerateRequest): { role: string; content: string }[] {
   const messages: { role: string; content: string }[] = [
@@ -143,8 +141,16 @@ function buildPrompt(req: GenerateRequest): string {
       prompt += `\nAvailable props: ${JSON.stringify(req.slotContext.availableProps)}`;
     }
   }
+  if (req.appContext) {
+    prompt += `\n\nApp styling: ${req.appContext}`;
+  }
+  // Existing generated code takes priority (iterative refinement)
   if (req.existingCode) {
-    prompt += `\n\nCurrent component code to modify:\n${req.existingCode}`;
+    prompt += `\n\nHere is the CURRENT component code. Make ONLY the changes I asked for — keep everything else identical:\n\`\`\`\n${req.existingCode}\n\`\`\``;
+  }
+  // Original slot code — the default content being replaced (first generation)
+  else if (req.slotContext?.originalCode) {
+    prompt += `\n\nHere is the ORIGINAL component code for this slot. Use it as the BASE — preserve its structure, styles, and colors. Add ONLY what I asked for:\n\`\`\`\n${req.slotContext.originalCode}\n\`\`\``;
   }
   return prompt;
 }

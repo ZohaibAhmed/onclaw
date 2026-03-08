@@ -86,9 +86,11 @@ export const { GET, POST } = createOnClawHandler({
 #### 4. Update root layout — Add OnClawProvider
 - Read the existing root layout.tsx
 - Add \`import { OnClawProvider } from "onclaw";\` at the top
-- Wrap children with \`<OnClawProvider userId="user" slots={...}>\`
+- Wrap children with \`<OnClawProvider userId="user" slots={...} appStyle="...">\`
 - The slots object keys MUST match the slot ids you'll inject in Phase 4
-- Each slot needs \`name\` and \`description\` (both strings)
+- Each slot needs \`name\` (string), \`description\` (string), and \`originalCode\` (string — the original JSX source of that slot's content, so the AI can use it as a base when generating)
+- The \`appStyle\` prop is a string describing the app's visual style, e.g. "Dark theme. Background: #121212. Sidebar: #19171D. Text: #D1D2D3. Accent: #1164A3. Font: system sans-serif. Compact spacing, rounded corners."
+- Extract the actual colors/fonts/spacing from the existing component code
 - DO NOT break the existing layout — wrap minimally
 
 ### Phase 4: Inject \`<Slot>\` Wrappers Into Existing Components (CRITICAL)
@@ -147,7 +149,7 @@ import { Slot } from "onclaw";
 - If you can't find something (no DB, no auth), skip that part gracefully
 - Create the .onclaw directory if it doesn't exist
 - Write clean, production-quality code
-- The OnClawProvider props are: \`userId\` (string), \`slots\` (Record<string, {name: string, description: string}>), \`endpoint\` (optional string), \`streamEndpoint\` (optional string), \`theme\` (optional "light"|"dark"|"auto"), \`themeOverrides\` (optional), \`store\` (optional), \`hideTrigger\` (optional boolean). Do NOT pass props that don't exist.
+- The OnClawProvider props are: \`userId\` (string), \`slots\` (Record<string, {name: string, description: string, originalCode?: string}>), \`appStyle\` (optional string — describes the app's visual style/colors), \`endpoint\` (optional string), \`streamEndpoint\` (optional string), \`theme\` (optional "light"|"dark"|"auto"), \`themeOverrides\` (optional), \`store\` (optional), \`hideTrigger\` (optional boolean). Do NOT pass props that don't exist.
 - The Slot component props are: \`id\` (string, required), \`children\` (ReactNode, the default content), \`props\` (optional Record), \`editable\` (optional boolean), \`className\` (optional), \`style\` (optional). Do NOT pass props that don't exist.
 - The createOnClawHandler config accepts: \`provider\`, \`apiKey\`, \`model\`, \`streaming\`, \`context\`, \`auth\`, \`authorize\`, \`mutations\`, \`rateLimit\`. Do NOT pass options that don't exist.
 

@@ -526,6 +526,7 @@ export function OnClawProvider({
             slotId: resolvedSlot,
             slotContext: slotConfig,
             existingCode: existing?.code,
+            appContext: config.appStyle,
             conversationHistory: history,
           };
 
@@ -662,6 +663,7 @@ export function OnClawProvider({
               slotId,
               slotContext: slotConfig,
               existingCode: existing?.code,
+              appContext: config.appStyle,
             },
             endpoint
           );

@@ -171,6 +171,13 @@ export interface OnClawConfig {
 
   /** Enable smart prompt refinement (auto-enhance vague prompts) */
   smartPrompts?: boolean;
+
+  /**
+   * App styling context passed to the LLM during generation.
+   * Describe your app's visual style so generated components match.
+   * E.g. "Dark theme. Background: #121212. Text: #D1D2D3. Accent: #1164A3. Rounded corners, compact spacing."
+   */
+  appStyle?: string;
 }
 
 export interface SlotConfig {
@@ -180,6 +187,8 @@ export interface SlotConfig {
   description?: string;
   /** Props available to generated components */
   availableProps?: Record<string, string>;
+  /** Original JSX/code of the slot's default content — gives the LLM context about what it's replacing */
+  originalCode?: string;
 }
 
 export interface OnClawTheme {
