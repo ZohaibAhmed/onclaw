@@ -33,6 +33,17 @@ import { buildRuntimeSystemPrompt, type ProjectManifest } from "./cli/prompts";
 import * as fs from "fs";
 import * as path from "path";
 
+/** Safe JSON response helper — avoids issues with Response.json() in some Next.js versions */
+function jsonResponse(data: unknown, init?: { status?: number; headers?: Record<string, string> }): Response {
+  return new Response(JSON.stringify(data), {
+    status: init?.status ?? 200,
+    headers: {
+      "Content-Type": "application/json",
+      ...init?.headers,
+    },
+  });
+}
+
 // ─── Types ──────────────────────────────────────────────
 
 interface OnClawUser {
@@ -174,22 +185,30 @@ export function createOnClawHandler(config: HandlerConfig) {
   const resolved = resolveOpenClawConfig(config);
 
   async function POST(req: Request): Promise<Response> {
-    const url = new URL(req.url);
-    const pathSegments = url.pathname.split("/").filter(Boolean);
-    const lastSegment = pathSegments[pathSegments.length - 1];
+    try {
+      const url = new URL(req.url);
+      const pathSegments = url.pathname.split("/").filter(Boolean);
+      const lastSegment = pathSegments[pathSegments.length - 1];
 
-    // Route: /api/onclaw/context — execute a context query/action
-    if (lastSegment === "context") {
-      return handleContextCall(req, config);
+      // Route: /api/onclaw/context — execute a context query/action
+      if (lastSegment === "context") {
+        return handleContextCall(req, config);
+      }
+
+      // Route: /api/onclaw/manifest — return the project manifest (for client-side enrichment)
+      if (lastSegment === "manifest") {
+        return handleManifest(config);
+      }
+
+      // Route: /api/onclaw/generate or /api/onclaw/stream — LLM generation
+      return handleGenerate(req, config, resolved);
+    } catch (err: any) {
+      console.error("[OnClaw] Handler error:", err);
+      return jsonResponse(
+        { error: err.message || "Internal server error" },
+        { status: 500 }
+      );
     }
-
-    // Route: /api/onclaw/manifest — return the project manifest (for client-side enrichment)
-    if (lastSegment === "manifest") {
-      return handleManifest(config);
-    }
-
-    // Route: /api/onclaw/generate or /api/onclaw/stream — LLM generation
-    return handleGenerate(req, config, resolved);
   }
 
   async function GET(req: Request): Promise<Response> {
@@ -220,18 +239,15 @@ async function handleContextCall(
       if (config.authorize) {
         const allowed = await config.authorize(user, "read");
         if (!allowed)
-          return Response.json({ error: "Forbidden" }, { status: 403 });
+          return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { "Content-Type": "application/json" } });
       }
     } catch {
-      return Response.json({ error: "Unauthorized" }, { status: 401 });
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { "Content-Type": "application/json" } });
     }
   }
 
   if (!config.context) {
-    return Response.json(
-      { error: "No context API configured" },
-      { status: 400 }
-    );
+    return jsonResponse({ error: "No context API configured" }, { status: 400 });
   }
 
   try {
@@ -241,25 +257,19 @@ async function handleContextCall(
     // Cap response size (10MB)
     const json = JSON.stringify(result);
     if (json.length > 10 * 1024 * 1024) {
-      return Response.json(
-        { error: "Response too large. Use filters to narrow the query." },
-        { status: 413 }
-      );
+      return jsonResponse({ error: "Response too large. Use filters to narrow the query." }, { status: 413 });
     }
 
-    return Response.json({ data: result });
+    return new Response(JSON.stringify({ data: result }), { headers: { "Content-Type": "application/json" } });
   } catch (err: any) {
-    return Response.json({ error: err.message }, { status: 400 });
+    return new Response(JSON.stringify({ error: err.message }), { status: 400, headers: { "Content-Type": "application/json" } });
   }
 }
 
 function handleManifest(config: HandlerConfig): Response {
   const manifest = loadManifest(config);
   if (!manifest) {
-    return Response.json(
-      { error: "No project manifest found. Run `npx onclaw init`." },
-      { status: 404 }
-    );
+    return jsonResponse({ error: "No project manifest found. Run `npx onclaw init`." }, { status: 404 });
   }
   // Return a safe subset — don't expose internal paths or sensitive info
   const safe = {
@@ -276,7 +286,7 @@ function handleManifest(config: HandlerConfig): Response {
     slots: manifest.slots,
     uiPatterns: manifest.uiPatterns,
   };
-  return Response.json(safe);
+  return new Response(JSON.stringify(safe), { headers: { "Content-Type": "application/json" } });
 }
 
 async function handleGenerate(
@@ -292,19 +302,16 @@ async function handleGenerate(
       if (config.authorize) {
         const allowed = await config.authorize(user, "generate");
         if (!allowed)
-          return Response.json({ error: "Forbidden" }, { status: 403 });
+          return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { "Content-Type": "application/json" } });
       }
     } catch {
-      return Response.json({ error: "Unauthorized" }, { status: 401 });
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { "Content-Type": "application/json" } });
     }
   }
 
   // Rate limit check
   if (user && !checkRateLimit(user.userId, config)) {
-    return Response.json(
-      { error: "Rate limit exceeded. Try again later." },
-      { status: 429 }
-    );
+    return jsonResponse({ error: "Rate limit exceeded. Try again later." }, { status: 429 });
   }
 
   const body = await req.json();
@@ -464,7 +471,7 @@ async function handleAnthropic(
 
   const data = await res.json();
   const content = data.content?.[0]?.text || "";
-  return Response.json({ choices: [{ message: { content } }] });
+  return new Response(JSON.stringify({ choices: [{ message: { content } }] }), { headers: { "Content-Type": "application/json" } });
 }
 
 // ─── Anthropic streaming ────────────────────────────────
@@ -561,7 +568,7 @@ async function handleOpenAI(
   });
 
   if (!res.ok) return new Response(await res.text(), { status: res.status });
-  return Response.json(await res.json());
+  return new Response(JSON.stringify(await res.json()), { headers: { "Content-Type": "application/json" } });
 }
 
 // ─── OpenAI streaming ───────────────────────────────────
