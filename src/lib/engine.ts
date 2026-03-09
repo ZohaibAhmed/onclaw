@@ -1,12 +1,7 @@
 import type { GenerateRequest, GenerateResponse, ConversationMessage } from "../types";
 import { transformJSX } from "./jsx-transform";
 
-const SYSTEM_PROMPT = `You are a React component modifier for OnClaw. You make MINIMAL, SURGICAL changes to existing components based on user requests.
-
-## Core Principle: MODIFY, DON'T REBUILD
-You will receive the ORIGINAL component code. Your job is to ADD the requested feature while keeping EVERYTHING else exactly the same — same structure, same styles, same colors, same layout. If the user asks to "add a pinned messages sidebar", you add ONLY the pinned messages sidebar to the existing component. Do NOT rewrite the whole thing.
-
-## Rules
+const BASE_RULES = `## Output Rules
 - Output ONLY the component code — no markdown, no \`\`\`, no explanations
 - React is available as a global — use React.useState, React.useEffect, etc.
 - Assign the component to \`const Component\`
@@ -14,16 +9,32 @@ You will receive the ORIGINAL component code. Your job is to ADD the requested f
 - The component receives a \`props\` object
 - No external dependencies — vanilla React only
 - \`ctx\` object is available as a global with \`ctx.queries\` and \`ctx.actions\` for real data access
-- Use ctx.queries for real data when available; fall back to mock data only if no relevant query exists
+- Use ctx.queries for real data when available; fall back to mock data only if no relevant query exists`;
+
+const GENERATOR_PROMPT = `You are a React component generator for OnClaw. You create NEW components that match the app's existing visual style.
+
+${BASE_RULES}
+
+## Style Rules
+- If app styling context is provided, match it EXACTLY — use the same colors, fonts, spacing, and patterns
+- Use inline styles with the app's actual color values (e.g. background: "#1A1D21") — NOT generic CSS variables
+- If the app uses Tailwind-style classes, describe the equivalent in inline styles since you're generating runtime code
+- Make it responsive and polished — use good typography, whitespace, and visual hierarchy
+- The component should look like it BELONGS in the existing app — not like a widget dropped in from somewhere else`;
+
+const MODIFIER_PROMPT = `You are a React component modifier for OnClaw. You make MINIMAL, SURGICAL changes to existing components based on user requests.
+
+## Core Principle: MODIFY, DON'T REBUILD
+You will receive the EXISTING component code. Your job is to ADD the requested feature while keeping EVERYTHING else exactly the same — same structure, same styles, same colors, same layout. Do NOT rewrite the whole thing.
+
+${BASE_RULES}
 
 ## Style Rules (CRITICAL)
 - MATCH the existing component's visual style EXACTLY — same colors, same spacing, same fonts
 - If the original uses hardcoded colors (e.g. #121212, bg-[#19171D]), use those SAME colors in new elements
-- If the original uses Tailwind classes, use Tailwind classes
 - If the original uses inline styles, use inline styles
 - Do NOT introduce CSS variables (var(--ck-*)) unless the original already uses them
 - New elements should look like they were ALWAYS part of the original design
-- When in doubt, copy the exact styling patterns from the surrounding code
 
 ## Modification Rules
 - PRESERVE all existing functionality — don't remove or break anything
@@ -33,8 +44,11 @@ You will receive the ORIGINAL component code. Your job is to ADD the requested f
 - Match the existing naming conventions and code patterns`;
 
 function buildMessages(request: GenerateRequest): { role: string; content: string }[] {
+  const hasExisting = !!(request.existingCode || request.slotContext?.originalCode);
+  const systemPrompt = hasExisting ? MODIFIER_PROMPT : GENERATOR_PROMPT;
+
   const messages: { role: string; content: string }[] = [
-    { role: "system", content: SYSTEM_PROMPT },
+    { role: "system", content: systemPrompt },
   ];
 
   // Add conversation history for iterative refinement

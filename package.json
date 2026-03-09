@@ -1,6 +1,6 @@
 {
   "name": "onclaw",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "AI-powered SaaS customization — let users reshape your app with natural language. One line of code.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
