@@ -2,7 +2,19 @@
 
 **Every user gets their own version of your app.**
 
-An open-source React library that turns any SaaS into a per-user platform. Users press `⌘K`, describe what they need, and get a live feature — backed by your real database. No templates, no mock data.
+A full-stack toolkit that turns any SaaS into a per-user platform. Users press `⌘K`, describe what they need, and get a live feature — backed by your real database. No templates, no mock data.
+
+## Demos
+
+### Adding a new component
+User asks for a task completion tracker → OnClaw generates it in real-time → component appears on the board instantly.
+
+https://github.com/user-attachments/assets/onclaw-add-component.mp4
+
+### Editing an existing component
+User modifies the analytics dashboard → describes what they want changed → component updates in place.
+
+https://github.com/user-attachments/assets/onclaw-edit-component.mp4
 
 ## Setup
 
