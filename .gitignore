@@ -6,3 +6,20 @@ dist/
 *.tsbuildinfo
 .npmrc
 .DS_Store
+
+# Test files
+test-*.ts
+test-*.mjs
+onclaw-api-test*.mjs
+TEST-RESULTS.md
+
+# Node modules in demo apps
+*/node_modules/
+*/.next/
+
+# Package locks in demo apps
+mixpanel-clone/package-lock.json
+trello-clone/package-lock.json
+slack-clone/package-lock.json
+crm-demo/package-lock.json
+demo/package-lock.json
