@@ -1,3 +1,5 @@
+<img width="1431" height="591" alt="image" src="https://github.com/user-attachments/assets/9142058f-888a-45d5-b61e-fb8dd3dfa1f4" />
+
 # OnClaw ⚡
 
 **Every user gets their own version of your app.**
@@ -9,12 +11,14 @@ A full-stack toolkit that turns any SaaS into a per-user platform. Users press `
 ### Adding a new component
 User asks for a task completion tracker → OnClaw generates it in real-time → component appears on the board instantly.
 
-https://github.com/user-attachments/assets/onclaw-add-component.mp4
+https://github.com/user-attachments/assets/0d6d42e5-174f-46ba-b644-e56dbbaef737
+
 
 ### Editing an existing component
 User modifies the analytics dashboard → describes what they want changed → component updates in place.
 
-https://github.com/user-attachments/assets/onclaw-edit-component.mp4
+https://github.com/user-attachments/assets/0378d056-246d-49d2-ba85-944cf7054d77
+
 
 ## Setup
 
