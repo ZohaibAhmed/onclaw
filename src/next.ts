@@ -314,7 +314,12 @@ async function handleGenerate(
     return jsonResponse({ error: "Rate limit exceeded. Try again later." }, { status: 429 });
   }
 
-  const body = await req.json();
+  let body: any;
+  try {
+    body = await req.json();
+  } catch {
+    return jsonResponse({ error: "Invalid JSON body" }, { status: 400 });
+  }
   let { messages, max_tokens = 4096, stream: clientRequestsStream } = body;
 
   // Handle legacy/direct prompt format: { prompt: "..." } → wrap into messages

@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+:root {
+  --ck-bg: #1a1d21;
+  --ck-bg-secondary: #222529;
+  --ck-bg-hover: #35373b;
+  --ck-text: #d1d2d3;
+  --ck-text-muted: #ababad;
+  --ck-accent: #4a154b;
+  --ck-accent-text: #ffffff;
+  --ck-border: #35373b;
+  --ck-radius: 8px;
+  --ck-font: "Inter", -apple-system, sans-serif;
+}
+
+/* Slack-like scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #35373b; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #4a4c50; }

@@ -274,7 +274,11 @@ function parseJSXElement(code: string, start: number): ParseResult | null {
         i++;
       }
       const trimmed = expr.trim();
-      if (trimmed) children.push(transformJSX(trimmed));
+      // Skip JSX comments {/* ... */} — they become bare block comments that
+      // create syntax errors ("unexpected ,") as createElement arguments
+      if (trimmed && !/^\/\*[\s\S]*\*\/$/.test(trimmed)) {
+        children.push(transformJSX(trimmed));
+      }
       continue;
     }
 
@@ -335,7 +339,9 @@ function parseJSXFragment(code: string, start: number): ParseResult | null {
         i++;
       }
       const trimmed = expr.trim();
-      if (trimmed) children.push(transformJSX(trimmed));
+      if (trimmed && !/^\/\*[\s\S]*\*\/$/.test(trimmed)) {
+        children.push(transformJSX(trimmed));
+      }
       continue;
     }
 

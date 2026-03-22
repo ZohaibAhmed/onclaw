@@ -176,6 +176,9 @@ function extractCode(raw: string): string {
   code = code.replace(/^import\s+.*?[;\n]/gm, "");
   code = code.replace(/^export\s+(default\s+)?/gm, "");
 
+  // Strip TypeScript syntax that breaks runtime compilation
+  code = stripTypeScript(code);
+
   if (!code.includes("Component")) {
     code = `const Component = (props) => {\n  return ${code}\n};`;
   }
@@ -184,6 +187,63 @@ function extractCode(raw: string): string {
   if (/<[A-Za-z][^>]*>/.test(code)) {
     code = transformJSX(code);
   }
+
+  return code;
+}
+
+/**
+ * Strip TypeScript-specific syntax to produce valid JavaScript.
+ * Handles the common TS patterns LLMs add to generated components.
+ */
+function stripTypeScript(code: string): string {
+  // Remove interface/type declarations (full blocks)
+  code = code.replace(/^(?:export\s+)?interface\s+\w+\s*(?:<[^>]*>)?\s*\{[^}]*\}\s*;?\s*\n?/gm, "");
+  code = code.replace(/^(?:export\s+)?type\s+\w+\s*(?:<[^>]*>)?\s*=\s*[^;]+;\s*\n?/gm, "");
+
+  // Remove 'as Type' assertions (but not 'as' in other contexts like destructuring aliases)
+  // Match: expression as TypeName — uppercase types AND lowercase primitives (string, number, boolean, etc.)
+  // Also handles: as string[], as Record<string, any>, as const
+  code = code.replace(/\s+as\s+(?:[A-Z]\w*(?:<[^>]*>)?(?:\[\])*|(?:string|number|boolean|any|unknown|never|void|null|undefined|object|bigint|symbol|const)(?:\[\])*)/g, "");
+
+  // Remove type annotations on const/let/var declarations: const x: Type = ...
+  // Handles: const Component: React.FC<Props> = ..., const x: string[] = ...
+  code = code.replace(/((?:const|let|var)\s+\w+)\s*:\s*(?:[A-Za-z_][\w.]*(?:<(?:[^<>]|<[^>]*>)*>)?(?:\[\])*)\s*=/g, "$1 =");
+
+  // Remove type annotations on function parameters: (x: Type) => ... or function(x: Type)
+  // Only target arrow function and function definition parameter lists — NOT all parentheses.
+  // Pattern: match params followed by => or { (function body)
+  // Handles: (props: Props) => ..., (x: string, y: number) => ..., function(x: Type) { ... }
+  code = code.replace(/(\([^)]*\))\s*(?==>|{)/g, (match) => {
+    // Only strip param annotations, not object properties
+    // Match: identifier: TypeName (but not inside object literals like { key: value })
+    return match.replace(/(\b\w+)\s*:\s*(?:[A-Z]\w*(?:<(?:[^<>]|<[^>]*>)*>)?(?:\[\])*|(?:string|number|boolean|any|unknown|never|void|null|undefined|object)(?:\[\])*)/g, "$1");
+  });
+
+  // Remove generic type parameters from function calls: useState<string[]>(...) → useState(...)
+  // Match: identifier<Type>( — handles identifiers, string/number literals, unions, objects
+  // Examples: useState<string>(""), useState<"a" | "b">("a"), useRef<HTMLDivElement>(null)
+  code = code.replace(/(\w+)\s*<((?:[A-Za-z_][\w.]*(?:\[\])?(?:\s*\|\s*(?:[A-Za-z_][\w.]*(?:\[\])?|"[^"]*"|'[^']*'|\d+|null|undefined))*)|(?:"[^"]*"(?:\s*\|\s*(?:"[^"]*"|'[^']*'|[A-Za-z_]\w*|null|undefined))*)|(?:\{[^}]*\}))>\s*\(/g, "$1(");
+
+  // Remove destructured parameter type annotations: ({ name }: { name: string }) → ({ name })
+  code = code.replace(/(\}\s*):\s*\{[^}]*\}/g, "$1");
+
+  // Remove generic type parameter declarations on arrow functions: <T extends ...>(props) =>
+  code = code.replace(/<\s*\w+\s+extends\s+\w+[^>]*>\s*(?=\()/g, "");
+
+  // Remove non-null assertions: ref.current!.focus() → ref.current.focus()
+  code = code.replace(/(\w+)!/g, "$1");
+
+  // Remove 'satisfies' keyword: {} satisfies Type → {}
+  code = code.replace(/\s+satisfies\s+[A-Za-z_][\w.<>,\s|&]*(?=[;\s)\],}])/g, "");
+
+  // Remove const enum declarations: const enum Status { ... }
+  code = code.replace(/^(?:export\s+)?const\s+enum\s+\w+\s*\{[^}]*\}\s*;?\s*\n?/gm, "");
+
+  // Remove intersection/union type annotations on variables: const x: A & B = ... or const x: A | B = ...
+  code = code.replace(/((?:const|let|var)\s+\w+)\s*:\s*(?:[A-Za-z_][\w.]*(?:<[^>]*>)?(?:\[\])?(?:\s*[&|]\s*[A-Za-z_][\w.]*(?:<[^>]*>)?(?:\[\])?)*)\s*=/g, "$1 =");
+
+  // Remove tuple type annotations: const [a, b]: [string, number] = ...
+  code = code.replace(/(const\s+\[[^\]]*\])\s*:\s*\[[^\]]*\]\s*=/g, "$1 =");
 
   return code;
 }
@@ -197,20 +257,56 @@ export function compileComponent(
   const args = ctx ? ["React", "ctx"] : ["React"];
   const vals = ctx ? [React, ctx] : [React];
 
+  // Pre-process: strip imports/exports, transform JSX, then strip TS from safe output.
+  // Order matters: JSX transform first (produces React.createElement), then only safe TS
+  // stripping (interfaces, type declarations, as assertions, const annotations, generics).
+  // We skip the aggressive param annotation regex after JSX transform to avoid corrupting
+  // createElement argument patterns.
+  function prepare(src: string): string {
+    let c = src;
+    // Strip import/export statements (LLMs sometimes include these)
+    c = c.replace(/^import\s+.*?[;\n]/gm, "");
+    c = c.replace(/^export\s+(default\s+)?/gm, "");
+
+    // Safe TS stripping that won't corrupt JSX or JS expressions:
+    // 1. Interface/type declarations (full blocks at line start)
+    c = c.replace(/^(?:export\s+)?interface\s+\w+\s*(?:<[^>]*>)?\s*\{[^}]*\}\s*;?\s*\n?/gm, "");
+    c = c.replace(/^(?:export\s+)?type\s+\w+\s*(?:<[^>]*>)?\s*=\s*[^;]+;\s*\n?/gm, "");
+    // 2. 'as Type' assertions
+    c = c.replace(/\s+as\s+(?:[A-Z]\w*(?:<[^>]*>)?(?:\[\])*|(?:string|number|boolean|any|unknown|never|void|null|undefined|object|bigint|symbol|const)(?:\[\])*)/g, "");
+    // 3. const/let/var type annotations: const x: Type = ...
+    c = c.replace(/((?:const|let|var)\s+\w+)\s*:\s*(?:[A-Za-z_][\w.]*(?:<(?:[^<>]|<[^>]*>)*>)?(?:\[\])*)\s*=/g, "$1 =");
+    // 4. Generic type params on function calls: useState<string>(...) → useState(...)
+    c = c.replace(/(\w+)\s*<((?:[A-Za-z_][\w.]*(?:\[\])?(?:\s*\|\s*(?:[A-Za-z_][\w.]*(?:\[\])?|"[^"]*"|'[^']*'|\d+|null|undefined))*)|(?:"[^"]*"(?:\s*\|\s*(?:"[^"]*"|'[^']*'|[A-Za-z_]\w*|null|undefined))*)|(?:\{[^}]*\}))>\s*\(/g, "$1(");
+
+    // Transform JSX (now safe — only non-destructive TS stripping was applied)
+    if (/<[A-Za-z][^>]*>/.test(c)) c = transformJSX(c);
+    return c;
+  }
+
+  // Helper: compile code string → Component function (throws on syntax error)
+  function tryCompile(src: string): ((props: Record<string, unknown>) => any) | null {
+    const factory = new Function(...args, `${src}\nreturn Component;`);
+    const result = factory(...vals);
+    return typeof result === "function" ? result : null;
+  }
+
   // First attempt: compile as-is
   try {
-    const factory = new Function(...args, `${code}\nreturn Component;`);
-    return factory(...vals);
+    return tryCompile(code);
   } catch (firstErr) {
-    // Second attempt: transform JSX and retry
+    // Second attempt: transform JSX + strip TS
     try {
-      const transformed = transformJSX(code);
-      if (transformed !== code) {
-        const factory = new Function(...args, `${transformed}\nreturn Component;`);
-        return factory(...vals);
+      const prepared = prepare(code);
+      if (prepared !== code) {
+        const result = tryCompile(prepared);
+        if (result) return result;
       }
-    } catch {
-      // Fall through
+    } catch (secondErr) {
+      // Log for debugging — this catch should rarely fire
+      if (process.env.ONCLAW_DEBUG) {
+        console.error("[OnClaw] Second attempt failed:", secondErr);
+      }
     }
 
     // Third attempt: wrap in Component if missing
@@ -218,11 +314,13 @@ export function compileComponent(
       const wrapped = code.includes("Component")
         ? code
         : `const Component = (props) => {\n  return ${code}\n};`;
-      const transformed = transformJSX(wrapped);
-      const factory = new Function(...args, `${transformed}\nreturn Component;`);
-      return factory(...vals);
-    } catch {
-      // Fall through
+      const prepared = prepare(wrapped);
+      const result = tryCompile(prepared);
+      if (result) return result;
+    } catch (thirdErr) {
+      if (process.env.ONCLAW_DEBUG) {
+        console.error("[OnClaw] Third attempt failed:", thirdErr);
+      }
     }
 
     console.error("[OnClaw] Failed to compile component:", firstErr);

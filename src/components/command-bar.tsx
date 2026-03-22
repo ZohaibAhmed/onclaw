@@ -870,17 +870,24 @@ function LivePreview({ code }: { code: string }) {
 function StreamingPreview({ code }: { code: string }) {
   const { ctxBridge } = useOnClaw();
   const [rendered, setRendered] = useState<React.ReactNode>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastCodeRef = useRef(code);
+  lastCodeRef.current = code;
 
   useEffect(() => {
-    // Attempt to compile every time code updates (will fail until code is complete)
-    try {
-      const fn = compileComponent(code, React, ctxBridge);
-      if (fn) {
-        setRendered(React.createElement(fn, {}));
+    // Debounce compilation — only attempt every 800ms to avoid freezing
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      try {
+        const fn = compileComponent(lastCodeRef.current, React, ctxBridge);
+        if (fn) {
+          setRendered(React.createElement(fn, {}));
+        }
+      } catch {
+        // Incomplete code — ignore
       }
-    } catch {
-      // Incomplete code — ignore
-    }
+    }, 800);
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [code]);
 
   if (!rendered) return null;

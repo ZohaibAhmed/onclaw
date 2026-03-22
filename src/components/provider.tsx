@@ -533,11 +533,20 @@ export function OnClawProvider({
           let result;
           if (streamEndpoint) {
             setGenerationStage("streaming");
+            let rafPending = false;
+            let latestAccumulated = "";
             result = await generateComponentStream(
               request,
               streamEndpoint,
               (_token, accumulated) => {
-                setStreamingCode(accumulated);
+                latestAccumulated = accumulated;
+                if (!rafPending) {
+                  rafPending = true;
+                  requestAnimationFrame(() => {
+                    rafPending = false;
+                    setStreamingCode(latestAccumulated);
+                  });
+                }
               }
             );
           } else {
