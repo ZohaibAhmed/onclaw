@@ -1,6 +1,7 @@
 <img width="1431" height="591" alt="image" src="https://github.com/user-attachments/assets/9142058f-888a-45d5-b61e-fb8dd3dfa1f4" />
 
 # OnClaw ⚡
+👉 **Read the full guide and thesis: [onclaw.dev](https://onclaw.dev)**
 
 **Every user gets their own version of your app.**
 
